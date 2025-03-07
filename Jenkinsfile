@@ -56,23 +56,32 @@ pipeline {
                 sh "docker logout || true"
             }
         }
+    }
 
-        stage('Send Email Notification') {
-            steps {
-                script {
-                    emailext subject: "Jenkins Build Notification: ${JOB_NAME} - Build #${BUILD_NUMBER}",
-                        body: """
-                        <p><strong>Build Status:</strong> ${CURRENT_BUILD_RESULT}</p>
-                        <p><strong>Project:</strong> ${JOB_NAME}</p>
-                        <p><strong>Build Number:</strong> ${BUILD_NUMBER}</p>
-                        <p><strong>Build URL:</strong> <a href="${BUILD_URL}">${BUILD_URL}</a></p>
-                        """,
-                        to: "i211660@nu.edu.pk",
-                        from: "i211660@nu.edu.pk",
-                        replyTo: "i211660@nu.edu.pk",
-                        mimeType: 'text/html'
-                }
-            }
+    post {
+        success {
+            emailext (
+                subject: "Jenkins Build Success: ${JOB_NAME} - Build #${BUILD_NUMBER}",
+                body: """
+                    Build Status: SUCCESS
+                    Job: ${JOB_NAME}
+                    Build Number: ${BUILD_NUMBER}
+                    Check console output at ${BUILD_URL}
+                """,
+                to: 'i211660@nu.edu.pk'
+            )
+        }
+        failure {
+            emailext (
+                subject: "Jenkins Build Failed: ${JOB_NAME} - Build #${BUILD_NUMBER}",
+                body: """
+                    Build Status: FAILURE
+                    Job: ${JOB_NAME}
+                    Build Number: ${BUILD_NUMBER}
+                    Check console output at ${BUILD_URL}
+                """,
+                to: 'i211660@nu.edu.pk'
+            )
         }
     }
 }
