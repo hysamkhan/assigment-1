@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE_NAME = 'hysamkhan/assigment-1' // Your Docker Hub image name
+        DOCKER_IMAGE_NAME = 'hysam/assigment-1' // Your Docker Hub image name
     }
 
     stages {
