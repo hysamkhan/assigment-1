@@ -30,7 +30,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                        sh """
+                            docker logout || true  # Ensure no existing session causes issues
+                            echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                            sleep 5  # Wait for login to fully take effect
+                        """
                     }
                 }
             }
@@ -39,15 +43,17 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh "docker push ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_IMAGE_NAME}:latest"
+                    sh """
+                        docker push ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
+                        docker push ${DOCKER_IMAGE_NAME}:latest
+                    """
                 }
             }
         }
 
         stage('Logout from Docker Hub') {
             steps {
-                sh "docker logout"
+                sh "docker logout || true"
             }
         }
     }
